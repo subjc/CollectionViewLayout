@@ -11,8 +11,6 @@ struct Item {
     var height: CGFloat
 }
 
-arc4random()
-
 func randomHeight() -> CGFloat {
     return CGFloat((arc4random() % 100) + 50)
 }
