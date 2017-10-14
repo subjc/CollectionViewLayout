@@ -17,27 +17,17 @@ func randomHeight() -> CGFloat {
 
 class DynamicLayout: UICollectionViewLayout {
     let verticalPadding: CGFloat = 10.0
-    var dynamicAnimator: UIDynamicAnimator?
+    lazy var dynamicAnimator: UIDynamicAnimator = { return UIDynamicAnimator(collectionViewLayout: self) }()
     var latestDelta: CGFloat = 0.0
     var staticContentSize: CGSize = .zero
-
-    override init() {
-        super.init()
-        dynamicAnimator = UIDynamicAnimator(collectionViewLayout: self)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 
     override func prepare() {
         super.prepare()
 
         guard let collectionView = collectionView,
-            let dataSource = collectionView.dataSource as? DataSource,
-            let dynamicAnimator = dynamicAnimator else { return }
+            let dataSource = collectionView.dataSource as? DataSource else { return }
 
-        let visibleRect = CGRect(origin: collectionView.bounds.origin, size: collectionView.frame.size).insetBy(dx: 0, dy: -100)
+        let visibleRect = collectionView.bounds.insetBy(dx: 0, dy: -100)
         let visiblePaths = indexPaths(rect: visibleRect)
         var currentlyVisible: [IndexPath] = []
 
@@ -92,8 +82,7 @@ class DynamicLayout: UICollectionViewLayout {
     }
 
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        guard let collectionView = collectionView,
-            let dynamicAnimator = dynamicAnimator else { return false }
+        guard let collectionView = collectionView else { return false }
 
         let delta = newBounds.origin.y - collectionView.bounds.origin.y
         latestDelta = delta
@@ -140,13 +129,13 @@ class DynamicLayout: UICollectionViewLayout {
     }
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return dynamicAnimator?.items(in: rect).map {
+        return dynamicAnimator.items(in: rect).map {
             ($0 as? UICollectionViewLayoutAttributes)!
         }
     }
 
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return dynamicAnimator?.layoutAttributesForCell(at: indexPath)
+        return dynamicAnimator.layoutAttributesForCell(at: indexPath)
     }
 
 
